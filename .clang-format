@@ -1,0 +1,32 @@
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+# 基于 LLVM 格式
+BasedOnStyle: LLVM
+# 使用支持的最新标准
+Standard: Latest
+# 行长度
+ColumnLimit: 120
+# 缩进4个空格
+IndentWidth: 4
+# 访问修饰符贴在左边
+AccessModifierOffset: -4
+# 指针符号贴在类型边
+PointerAlignment: Left
+# 左花括号在名称之后
+BreakBeforeBraces: Attach
+# 函数参数的小括号与函数名间不空格, 控制语句的小括号与语句间空格
+SpaceBeforeParens: ControlStatements
+# 允许空的花括号在一行上
+AllowShortBlocksOnASingleLine: Empty
+# 函数返回值与函数在同一行
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+# case和default之前缩进
+IndentCaseLabels: true
+# 初始化列表左右侧不留空格
+Cpp11BracedListStyle: true
+# 短 case 语句在同一行
+AllowShortCaseLabelsOnASingleLine: true
+# 在单行上的短枚举
+AllowShortEnumsOnASingleLine: false
+# 构造函数初始化列表
+BreakConstructorInitializers: BeforeComma

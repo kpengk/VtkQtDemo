@@ -1,0 +1,48 @@
+﻿{
+  "configurations": [
+    {
+      "name": "x64-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "CMAKE_PREFIX_PATH",
+          "value": "C:\\Qt\\6.2.3\\msvc2019_64\\lib\\cmake\\Qt6",
+          "type": "STRING"
+        },
+        {
+          "name": "VTK_DIR",
+          "value": "D:/3rdparty/VTK/install/lib/cmake/vtk-9.2"
+        }
+      ]
+    },
+    {
+      "name": "x64-Release",
+      "generator": "Ninja",
+      "configurationType": "RelWithDebInfo",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": [
+        {
+          "name": "CMAKE_PREFIX_PATH",
+          "value": "C:\\Qt\\6.2.3\\msvc2019_64\\lib\\cmake\\Qt6",
+          "type": "STRING"
+        },
+        {
+          "name": "VTK_DIR",
+          "value": "D:/3rdparty/VTK/install/lib/cmake/vtk-9.2"
+        }
+      ]
+    }
+  ]
+}
