@@ -6,48 +6,34 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>778</width>
-    <height>587</height>
+    <width>846</width>
+    <height>584</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>VTK Demo</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>文件</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>文件</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="fileLineEdit">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
-     <item>
-      <widget class="QLineEdit" name="fileLineEdit">
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="selectBtn">
-       <property name="text">
-        <string>选择</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="resetCameraBtn">
-       <property name="text">
-        <string>重置相机</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QVTKOpenGLStereoWidget" name="qvtkWidget" native="true">
        <property name="sizePolicy">
@@ -58,70 +44,108 @@
        </property>
       </widget>
      </item>
-     <item>
-      <layout class="QFormLayout" name="formLayout">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>坐标轴</string>
-         </property>
-        </widget>
+    </layout>
+   </item>
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0" colspan="2">
+      <widget class="QPushButton" name="selectBtn">
+       <property name="text">
+        <string>选择</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>坐    标     轴</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QCheckBox" name="axisCheckBox">
+       <property name="text">
+        <string>显示</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>模            式</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="modeComboBox">
+       <item>
+        <property name="text">
+         <string>面模式</string>
+        </property>
        </item>
-       <item row="0" column="1">
-        <widget class="QCheckBox" name="axisCheckBox">
-         <property name="text">
-          <string>显示</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
+       <item>
+        <property name="text">
+         <string>点模式</string>
+        </property>
        </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>模   式</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QComboBox" name="modeComboBox">
-         <item>
-          <property name="text">
-           <string>面模式</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>点模式</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="transparencyLabel">
-         <property name="text">
-          <string>透明度</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QSlider" name="transparencySlider">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="transparencyLabel">
+       <property name="text">
+        <string>透    明     度</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QSlider" name="transparencySlider">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="transparencyLabel_6">
+       <property name="text">
+        <string>点    大     小</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QSpinBox" name="pointSizeSpinBox">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>16</number>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="transparencyLabel_5">
+       <property name="text">
+        <string>镜  面  指  数</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QSpinBox" name="specularPowerSpinBox">
+       <property name="maximum">
+        <number>128</number>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

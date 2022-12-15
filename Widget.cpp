@@ -80,23 +80,31 @@ Widget::Widget(QWidget* parent)
     , ui(new Ui::Widget)
     , points_{vtkSmartPointer<vtkPoints>::New()}
     , points_colors_{vtkSmartPointer<vtkUnsignedCharArray>::New()}
-    , vertices_{vtkSmartPointer<vtkCellArray>::New()}
-    , poly_data_{vtkSmartPointer<vtkPolyData>::New()}
-    , norm_filter_{vtkSmartPointer<vtkPolyDataNormals>::New()}
-    , mapper_{vtkSmartPointer<vtkPolyDataMapper>::New()}
-    , point_actor_{vtkSmartPointer<vtkActor>::New()}
+    , rail_vertices_{vtkSmartPointer<vtkCellArray>::New()}
+    , defect_vertices_{vtkSmartPointer<vtkCellArray>::New()}
+    , triangle_array_{vtkSmartPointer<vtkCellArray>::New()}
+    , rail_poly_data_{vtkSmartPointer<vtkPolyData>::New()}
+    , defect_poly_data_{vtkSmartPointer<vtkPolyData>::New()}
+    , rail_norm_filter_{vtkSmartPointer<vtkPolyDataNormals>::New()}
+    , rail_mapper_{vtkSmartPointer<vtkPolyDataMapper>::New()}
+    , defect_mapper_{vtkSmartPointer<vtkPolyDataMapper>::New()}
+    , rail_actor_{vtkSmartPointer<vtkActor>::New()}
+    , defect_actor_{vtkSmartPointer<vtkActor>::New()}
     , axes_actor_{vtkSmartPointer<vtkCubeAxesActor>::New()}
     , renderer_{vtkSmartPointer<vtkRenderer>::New()}
     , render_window_{vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New()} {
     ui->setupUi(this);
 
-    init_geometry();
+    // 指定(颜色)数组中每个元组的大小
+    points_colors_->SetNumberOfComponents(3);
+
+    init_geometry_rail();
+    init_geometry_defect();
     init_axis();
-    init_light();
     
 
     // 设置背景色
-    const vtkColor4d bgcolor{48.0 / 255.0, 56.0 / 255.0, 65.0 / 255.0, 1.0};
+    const vtkColor3d bgcolor{0.18, 0.22, 0.25};
     renderer_->SetBackground(bgcolor.GetData());
     renderer_->ResetCamera();
     renderer_->ResetCameraClippingRange();
@@ -120,21 +128,30 @@ Widget::Widget(QWidget* parent)
         render_window_->Render();
     });
     connect(ui->modeComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
-        if (index == 0) {
-            ui->transparencyLabel->setVisible(true);
-            ui->transparencySlider->setVisible(true);
+        if (ui->modeComboBox->currentIndex() == 0) {
+            rail_poly_data_->SetPolys(triangle_array_); // 渲染三角形
+            rail_poly_data_->SetVerts({});                   // 设置渲染顶点
+            rail_poly_data_->GetPointData()->SetScalars({}); //设置顶点颜色
         } else {
-            ui->transparencyLabel->setVisible(false);
-            ui->transparencySlider->setVisible(false);
+            rail_poly_data_->SetPolys({});
+            rail_poly_data_->SetVerts(rail_vertices_);                   // 设置渲染顶点
+            rail_poly_data_->GetPointData()->SetScalars(points_colors_); //设置顶点颜色
         }
-    });
-    connect(ui->transparencySlider, &QSlider::valueChanged, this, [this](int val) {
-        point_actor_->GetProperty()->SetOpacity(val / 100.0);
-        point_actor_->GetProperty()->SetColor(val / 100.0, val / 100.0, val / 100.0);
+
+        rail_poly_data_->Modified();
+        rail_norm_filter_->Update();
         render_window_->Render();
     });
-    connect(ui->resetCameraBtn, &QPushButton::clicked, this, [this]() {
-        renderer_->ResetCamera();
+    connect(ui->transparencySlider, &QSlider::valueChanged, this, [this](int val) {
+        rail_actor_->GetProperty()->SetOpacity(1.0 - val / 100.0);
+        render_window_->Render();
+    });
+    connect(ui->pointSizeSpinBox, &QSpinBox::valueChanged, this, [this](int val){
+        rail_actor_->GetProperty()->SetPointSize(val);
+        render_window_->Render();
+    });
+    connect(ui->specularPowerSpinBox, &QSpinBox::valueChanged, this, [this](int val) {
+        rail_actor_->GetProperty()->SetSpecularPower(val); // 镜面指数
         render_window_->Render();
     });
 }
@@ -146,8 +163,9 @@ void Widget::update_data(const std::vector<std::array<float, 5>>& cloud) {
     printf("Start update data\n");
     timer t;
     points_->Resize(0);
-    vertices_->Reset();
     points_colors_->Resize(0);
+    rail_vertices_->Reset();
+    defect_vertices_->Reset();
 
     // 物体
     const int max_point_count = cloud.size();
@@ -164,7 +182,13 @@ void Widget::update_data(const std::vector<std::array<float, 5>>& cloud) {
         const auto& value = cloud[n];
         ++point_count;
 
-        if (value[4] < 1) {
+        points_->InsertNextPoint(value[0], value[1], value[2]); // 加入点信息
+
+        const auto colors = map_color(value[3]);
+        unsigned char color[] = {colors[0] * 255, colors[1] * 255, colors[2] * 255};
+        points_colors_->InsertNextTypedTuple(color);
+
+        if (value[4] < 1) { // 钢轨
             if (!equal(value[2], prev_z)) {
                 mesh.add_section(section);
                 section.clear();
@@ -172,69 +196,85 @@ void Widget::update_data(const std::vector<std::array<float, 5>>& cloud) {
             }
             section.push_back({value[0], value[1], value[2]});
 
-            points_->InsertNextPoint(value[0], value[1], value[2]); // 加入点信息
+            rail_vertices_->InsertNextCell(1); // 加入顶点信息----用于渲染点集
+            rail_vertices_->InsertCellPoint(n);
 
-            const auto colors = map_color(value[3]);
-            //unsigned char color[] = {colors[0] * 255, colors[1] * 255, colors[2] * 255, 255};
-            constexpr unsigned char color[] = {224, 225, 218, 255};
-            points_colors_->InsertNextTypedTuple(color);
-        } else {
-            points_->InsertNextPoint(value[0], value[1], value[2]); // 加入点信息
-            vertices_->InsertNextCell(1);                           // 加入顶点信息----用于渲染点集
-            vertices_->InsertCellPoint(n);
-
-            const auto colors = map_color(value[3]);
-            unsigned char color[] = {colors[0] * 255, colors[1] * 255, colors[2] * 255, 255};
-            points_colors_->InsertNextTypedTuple(color);
+        } else { // 缺陷
+            defect_vertices_->InsertNextCell(1);// 加入顶点信息----用于渲染点集
+            defect_vertices_->InsertCellPoint(n);
         }
     }
 
     // 三角形
     const auto t1 = t.restart();
-    auto cells = vtkSmartPointer<vtkCellArray>::New();
-    cells->AllocateEstimate(mesh.triangles().size(), sizeof(TrianglePointId));
+    triangle_array_->Reset();
+    triangle_array_->AllocateEstimate(mesh.triangles().size(), sizeof(TrianglePointId));
     for (auto& triangle : mesh.triangles()) {
-        cells->InsertNextCell({triangle[0], triangle[1], triangle[2]});
+        triangle_array_->InsertNextCell({triangle[0], triangle[1], triangle[2]});
     }
     printf("Time: %lf, %lf\n", t1, t.elapsed());
 
-    poly_data_->SetPoints(points_);                        // 设置点集
-    poly_data_->SetPolys(cells);                           // 渲染三角形
-    poly_data_->SetVerts(vertices_);                       // 设置渲染顶点
-    poly_data_->GetPointData()->SetScalars(points_colors_); //设置顶点颜色
+    rail_poly_data_->SetPoints(points_); // 设置点集
+    if (ui->modeComboBox->currentIndex() == 0) {
+        rail_poly_data_->SetPolys(triangle_array_);                            // 渲染三角形
+    } else {
+        rail_poly_data_->SetVerts(rail_vertices_);                   // 设置渲染顶点
+        rail_poly_data_->GetPointData()->SetScalars(points_colors_); //设置顶点颜色
+    }
+
+    defect_poly_data_->SetPoints(points_);                         // 设置点集
+    defect_poly_data_->SetVerts(defect_vertices_);                   // 设置渲染顶点
+    defect_poly_data_->GetPointData()->SetScalars(points_colors_); //设置顶点颜色
     
     axes_actor_->SetBounds(points_->GetBounds());
 
-    poly_data_->Modified();
-    norm_filter_->Update();
+    rail_poly_data_->Modified();
+    defect_poly_data_->Modified();
+    rail_norm_filter_->Update();
     renderer_->ResetCamera();
     render_window_->Render();
 }
 
-void Widget::init_geometry() {
-    // 指定(颜色)数组中每个元组的大小
-    points_colors_->SetNumberOfComponents(4);
-
+void Widget::init_geometry_rail() {
     // 计算法几何体向量
-    norm_filter_->SetInputData(poly_data_);
-    norm_filter_->SetComputePointNormals(1);
-    norm_filter_->SetComputeCellNormals(1);
+    rail_norm_filter_->SetInputData(rail_poly_data_);
+    rail_norm_filter_->SetComputePointNormals(1);
+    rail_norm_filter_->SetComputeCellNormals(1);
 
     // 映射器负责将几何体推入图形库。如果定义了标量或其他属性，它还可以进行颜色映射。
-    mapper_->SetInputData(norm_filter_->GetOutput());
+    rail_mapper_->SetInputData(rail_norm_filter_->GetOutput());
 
     // actor是一种分组机制：除了几何体（mapper），它还具有属性、变换矩阵和/或纹理贴图
-    point_actor_->SetMapper(mapper_);
-    point_actor_->GetProperty()->SetPointSize(1);
-    point_actor_->GetProperty()->SetAmbient(0.4);       // 环境光系数
-    point_actor_->GetProperty()->SetDiffuse(0.4);       // 漫反射光系数
-    point_actor_->GetProperty()->SetSpecular(0.2);      // 镜反射光系数
-    point_actor_->GetProperty()->SetSpecularPower(0.0); // 镜面指数
-    // point_actor_->GetProperty()->SetShading(true);
-    // point_actor_->RotateX(30.0); // 围绕X轴旋
-    // point_actor_->RotateY(45.0); // 围绕Y轴旋
+    rail_actor_->SetMapper(rail_mapper_);
+    rail_actor_->GetProperty()->SetColor(224 / 255.0, 225 / 255.0, 218 / 255.0);
+    rail_actor_->GetProperty()->SetPointSize(1);
+    rail_actor_->GetProperty()->SetAmbient(0.4);        // 环境光系数
+    rail_actor_->GetProperty()->SetDiffuse(0.4);        // 漫反射光系数
+    rail_actor_->GetProperty()->SetSpecular(0.2);       // 镜反射光系数
+    rail_actor_->GetProperty()->SetSpecularPower(20.0);  // 镜面指数
+    //rail_actor_->GetProperty()->SetShading(true);
+    //rail_actor_->RotateX(30.0); // 围绕X轴旋
+    //rail_actor_->RotateY(45.0); // 围绕Y轴旋
 
-    renderer_->AddActor(point_actor_);
+    renderer_->AddActor(rail_actor_);
+}
+
+void Widget::init_geometry_defect() {
+    // 映射器负责将几何体推入图形库。如果定义了标量或其他属性，它还可以进行颜色映射。
+    defect_mapper_->SetInputData(defect_poly_data_);
+
+    // actor是一种分组机制：除了几何体（mapper），它还具有属性、变换矩阵和/或纹理贴图
+    defect_actor_->SetMapper(defect_mapper_);
+    defect_actor_->GetProperty()->SetPointSize(1);
+    defect_actor_->GetProperty()->SetAmbient(0.4);     // 环境光系数
+    defect_actor_->GetProperty()->SetDiffuse(0.4);     // 漫反射光系数
+    defect_actor_->GetProperty()->SetSpecular(0.2);    // 镜反射光系数
+    defect_actor_->GetProperty()->SetSpecularPower(20.0); // 镜面指数
+    //defect_actor_->GetProperty()->SetShading(true);
+    //defect_actor_->RotateX(30.0); // 围绕X轴旋
+    //defect_actor_->RotateY(45.0); // 围绕Y轴旋
+
+    renderer_->AddActor(defect_actor_);
 }
 
 void Widget::init_axis() {
@@ -255,7 +295,7 @@ void Widget::init_axis() {
     axes_actor_->SetFlyMode(0);
     //设置惯性因子，该惯性因子控制轴切换位置的频率（从一个轴跳到另一个轴）
     // m_cubeAxesActor->SetInertia(1);
-    //
+
     //网格设置
     //开启x、y、z轴的网格线绘制
     axes_actor_->DrawXGridlinesOn();
@@ -283,13 +323,4 @@ void Widget::init_axis() {
     axes_actor_->SetTickLocation(1);
 
     renderer_->AddActor(axes_actor_);
-}
-
-void Widget::init_light() {
-    vtkSmartPointer<vtkLight> light = vtkSmartPointer<vtkLight>::New();
-    light->SetColor(1, 0.95, 0.95);
-    light->SetPosition(0, 0, 6);
-    light->SetFocalPoint(renderer_->GetActiveCamera()->GetFocalPoint());
-
-    //renderer_->AddLight(light);
 }
