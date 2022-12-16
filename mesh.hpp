@@ -6,9 +6,10 @@ using Point3D = std::array<float, 3>;
 
 class Mesh {
 public:
-    Mesh()
+    Mesh(float max_dist = 5.0)
         : pre_start_{}
-        , cur_start_{} {}
+        , cur_start_{}
+        , max_dist_{max_dist} {}
 
     void reserve(std::size_t n) { 
         points_.reserve(n);
@@ -42,7 +43,7 @@ private:
     }
 
     void make_triangles(int i, int end_i, int j, int end_j) {
-        constexpr float max_dist_squared{5.0 * 5.0};
+        const float max_dist_squared{max_dist_ * max_dist_};
 
         if (i >= end_i || j >= end_j) {
             return;
@@ -75,6 +76,7 @@ private:
     }
 
 private:
+    const float max_dist_;
     std::size_t pre_start_;
     std::size_t cur_start_;
     std::vector<Point3D> points_;

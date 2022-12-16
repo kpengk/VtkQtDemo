@@ -193,8 +193,20 @@ PointCloud3D::PointCloud3D(QWidget* parent)
         d->defect_actor_->GetProperty()->SetPointSize(val);
         d->render_window_->Render();
     });
+    connect(ui->ambientSpinBox, &QDoubleSpinBox::valueChanged, this, [this](int val) {
+        d->rail_actor_->GetProperty()->SetAmbient(val); // 环境光系数
+        d->render_window_->Render();
+    });
+    connect(ui->diffuseSpinBox, &QDoubleSpinBox::valueChanged, this, [this](int val) {
+        d->rail_actor_->GetProperty()->SetDiffuse(val); // 漫反射光系数
+        d->render_window_->Render();
+    });
+    connect(ui->specularSpinBox, &QDoubleSpinBox::valueChanged, this, [this](int val) {
+        d->rail_actor_->GetProperty()->SetSpecular(val); // 镜反射光系数
+        d->render_window_->Render();
+    });
     connect(ui->specularPowerSpinBox, &QSpinBox::valueChanged, this, [this](int val) {
-        d->rail_actor_->GetProperty()->SetSpecularPower(val); // 镜面指数
+        d->rail_actor_->GetProperty()->SetSpecularPower(val); // 高光指数
         d->render_window_->Render();
     });
     connect(ui->setPositionBtn, &QPushButton::clicked, this, [this](int val) {
@@ -225,7 +237,7 @@ void PointCloud3D::update_data(const std::vector<std::array<float, 5>>& cloud) {
     // 物体
     const int max_point_count = cloud.size();
 
-    Mesh mesh;
+    Mesh mesh(10);
     mesh.reserve(max_point_count);
 
     // 读点云数据信息
@@ -306,7 +318,11 @@ void PointCloud3D::init_geometry_rail() {
     d->rail_actor_->GetProperty()->SetAmbient(0.4);     // 环境光系数
     d->rail_actor_->GetProperty()->SetDiffuse(0.4);     // 漫反射光系数
     d->rail_actor_->GetProperty()->SetSpecular(0.2);    // 镜反射光系数
-    d->rail_actor_->GetProperty()->SetSpecularPower(20.0); // 镜面指数
+    d->rail_actor_->GetProperty()->SetSpecularPower(20.0); // 镜面高光指数
+
+    d->rail_actor_->GetProperty()->SetAmbientColor(74.0 / 255.0, 171.0 / 255.0, 255.0 / 225.0);
+    d->rail_actor_->GetProperty()->SetDiffuseColor(74.0 / 255.0, 171.0 / 255.0, 255.0 / 225.0);
+    d->rail_actor_->GetProperty()->SetSpecularColor(74.0 / 255.0, 171.0 / 255.0, 255.0 / 225.0);
 
     d->renderer_->AddActor(d->rail_actor_);
 }
