@@ -147,12 +147,25 @@ Widget::Widget(QWidget* parent)
         render_window_->Render();
     });
     connect(ui->pointSizeSpinBox, &QSpinBox::valueChanged, this, [this](int val){
-        rail_actor_->GetProperty()->SetPointSize(val);
+        defect_actor_->GetProperty()->SetPointSize(val);
         render_window_->Render();
     });
     connect(ui->specularPowerSpinBox, &QSpinBox::valueChanged, this, [this](int val) {
         rail_actor_->GetProperty()->SetSpecularPower(val); // 镜面指数
         render_window_->Render();
+    });
+    connect(ui->setPositionBtn, &QPushButton::clicked, this, [this](int val) {
+        auto camera = renderer_->GetActiveCamera();
+        camera->SetPosition(ui->positionXSpinBox->value(), ui->positionYSpinBox->value(),
+                            ui->positionZSpinBox->value());
+        render_window_->Render();
+    });
+    connect(ui->getPositionBtn, &QPushButton::clicked, this, [this](int val) {
+        const auto camera = renderer_->GetActiveCamera();
+        const double* position = camera->GetPosition();
+        ui->positionXSpinBox->setValue(position[0]);
+        ui->positionYSpinBox->setValue(position[1]);
+        ui->positionZSpinBox->setValue(position[2]);
     });
 }
 
@@ -246,15 +259,12 @@ void Widget::init_geometry_rail() {
 
     // actor是一种分组机制：除了几何体（mapper），它还具有属性、变换矩阵和/或纹理贴图
     rail_actor_->SetMapper(rail_mapper_);
-    rail_actor_->GetProperty()->SetColor(224 / 255.0, 225 / 255.0, 218 / 255.0);
+    rail_actor_->GetProperty()->SetColor(0.87, 0.87, 0.87);
     rail_actor_->GetProperty()->SetPointSize(1);
     rail_actor_->GetProperty()->SetAmbient(0.4);        // 环境光系数
     rail_actor_->GetProperty()->SetDiffuse(0.4);        // 漫反射光系数
     rail_actor_->GetProperty()->SetSpecular(0.2);       // 镜反射光系数
     rail_actor_->GetProperty()->SetSpecularPower(20.0);  // 镜面指数
-    //rail_actor_->GetProperty()->SetShading(true);
-    //rail_actor_->RotateX(30.0); // 围绕X轴旋
-    //rail_actor_->RotateY(45.0); // 围绕Y轴旋
 
     renderer_->AddActor(rail_actor_);
 }
@@ -270,9 +280,6 @@ void Widget::init_geometry_defect() {
     defect_actor_->GetProperty()->SetDiffuse(0.4);     // 漫反射光系数
     defect_actor_->GetProperty()->SetSpecular(0.2);    // 镜反射光系数
     defect_actor_->GetProperty()->SetSpecularPower(20.0); // 镜面指数
-    //defect_actor_->GetProperty()->SetShading(true);
-    //defect_actor_->RotateX(30.0); // 围绕X轴旋
-    //defect_actor_->RotateY(45.0); // 围绕Y轴旋
 
     renderer_->AddActor(defect_actor_);
 }

@@ -58,7 +58,7 @@
      <item row="1" column="0">
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>坐    标     轴</string>
+        <string>坐标轴</string>
        </property>
       </widget>
      </item>
@@ -75,7 +75,7 @@
      <item row="2" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>模            式</string>
+        <string>模式</string>
        </property>
       </widget>
      </item>
@@ -94,9 +94,9 @@
       </widget>
      </item>
      <item row="3" column="0">
-      <widget class="QLabel" name="transparencyLabel">
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>透    明     度</string>
+        <string>透明度</string>
        </property>
       </widget>
      </item>
@@ -117,9 +117,9 @@
       </widget>
      </item>
      <item row="4" column="0">
-      <widget class="QLabel" name="transparencyLabel_6">
+      <widget class="QLabel" name="label_6">
        <property name="text">
-        <string>点    大     小</string>
+        <string>点大小</string>
        </property>
       </widget>
      </item>
@@ -129,14 +129,14 @@
         <number>1</number>
        </property>
        <property name="maximum">
-        <number>16</number>
+        <number>8</number>
        </property>
       </widget>
      </item>
      <item row="5" column="0">
-      <widget class="QLabel" name="transparencyLabel_5">
+      <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>镜  面  指  数</string>
+        <string>镜面指数</string>
        </property>
       </widget>
      </item>
@@ -144,6 +144,77 @@
       <widget class="QSpinBox" name="specularPowerSpinBox">
        <property name="maximum">
         <number>128</number>
+       </property>
+       <property name="singleStep">
+        <number>10</number>
+       </property>
+       <property name="value">
+        <number>20</number>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>相机位置X</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QDoubleSpinBox" name="positionXSpinBox">
+       <property name="minimum">
+        <double>-999999999.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>999999999.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLabel" name="label_8">
+       <property name="text">
+        <string>相机位置Y</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QDoubleSpinBox" name="positionYSpinBox">
+       <property name="minimum">
+        <double>-999999999.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>999999999.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>相机位置Z</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QDoubleSpinBox" name="positionZSpinBox">
+       <property name="minimum">
+        <double>-999999999.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>999999999.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0">
+      <widget class="QPushButton" name="setPositionBtn">
+       <property name="text">
+        <string>设置相机位置</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="1">
+      <widget class="QPushButton" name="getPositionBtn">
+       <property name="text">
+        <string>获取相机位置</string>
        </property>
       </widget>
      </item>
